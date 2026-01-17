@@ -30,7 +30,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8000
+      - NEXT_PUBLIC_API_URL=http://ai-proof-backend:8000
     volumes:
       - ./frontend:/app/frontend
     depends_on:

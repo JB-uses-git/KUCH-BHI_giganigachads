@@ -45,7 +45,11 @@ export default function GeneratePage() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('http://localhost:8000/api/stamp', {
+        // Dynamically construct API URL based on current hostname
+        const apiUrl = typeof window !== 'undefined'
+          ? `http://${window.location.hostname}:8000`
+          : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/stamp`, {
         method: 'POST',
         body: formData,
       });
