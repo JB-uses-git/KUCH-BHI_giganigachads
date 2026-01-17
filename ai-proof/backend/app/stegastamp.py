@@ -49,13 +49,15 @@ class StegaStampWrapper:
             print(f"Warning: Could not load model: {e}")
             self.session = None
     
-    def encode_image(self, image_path, secret="AI-PROOF-v1"):
+    def encode_image(self, image_path, secret="AI-PROOF-v1", strength=0.7, adaptive=False):
         """
         Encode invisible watermark into an image.
         
         Args:
             image_path: Path to the image file
             secret: Secret message/watermark to embed (default: "AI-PROOF-v1")
+            strength: Watermark strength 0.0-1.0 (default: 0.7, lower = less visible)
+            adaptive: Apply variance-based adaptive masking to reduce artifacts (default: False)
         
         Returns:
             Watermarked image as base64 string
@@ -136,6 +138,11 @@ class StegaStampWrapper:
             else:
                 # Simulation mode: apply simple watermarking
                 watermarked = self._apply_simple_watermark(image_normalized)
+            
+            # Apply strength and adaptive masking to reduce visible artifacts
+            watermarked = self._apply_strength_and_masking(
+                image_normalized, watermarked, strength, adaptive
+            )
             
             # Convert back to uint8 [0, 255]
             watermarked = (np.clip(watermarked, 0, 1) * 255).astype(np.uint8)
@@ -390,6 +397,54 @@ class StegaStampWrapper:
         
         return confidence
     
+    def _apply_strength_and_masking(self, original, watermarked, strength, adaptive):
+        """
+        Apply strength scaling and optional adaptive masking to reduce visible artifacts.
+        
+        Args:
+            original: Original image (normalized float32, 0-1)
+            watermarked: Watermarked image from model (normalized float32, 0-1)
+            strength: Global strength multiplier 0.0-1.0
+            adaptive: Whether to apply variance-based adaptive masking
+        
+        Returns:
+            Blended watermarked image
+        """
+        # Compute residual (what the model added)
+        residual = watermarked - original
+        
+        if adaptive:
+            # Compute local variance mask (higher variance = more watermark strength)
+            gray_orig = cv2.cvtColor((original * 255).astype(np.uint8), cv2.COLOR_RGB2GRAY)
+            
+            # Use 15x15 window for variance calculation
+            kernel_size = 15
+            mean = cv2.blur(gray_orig.astype(np.float32), (kernel_size, kernel_size))
+            mean_sq = cv2.blur((gray_orig.astype(np.float32) ** 2), (kernel_size, kernel_size))
+            variance = mean_sq - (mean ** 2)
+            
+            # Normalize variance to 0-1
+            variance_norm = variance / (variance.max() + 1e-8)
+            
+            # Apply threshold: reduce strength in low-variance (flat) areas
+            # Sigmoid mapping: flat areas get ~0.3x, textured areas get ~1.0x
+            adaptive_mask = 0.3 + 0.7 * (1 / (1 + np.exp(-10 * (variance_norm - 0.3))))
+            
+            # Expand mask to 3 channels
+            adaptive_mask = np.expand_dims(adaptive_mask, axis=-1)
+            adaptive_mask = np.repeat(adaptive_mask, 3, axis=-1) / 255.0
+            
+            # Apply adaptive mask to residual
+            residual = residual * adaptive_mask
+        
+        # Apply global strength
+        residual = residual * strength
+        
+        # Blend back with original
+        result = original + residual
+        
+        return result
+    
     def _generate_frequency_heatmap(self, image):
         """Generate frequency domain heatmap for visualization."""
         try:
@@ -440,10 +495,10 @@ def get_wrapper():
         _wrapper = StegaStampWrapper()
     return _wrapper
 
-def encode_image(image_path, secret="AI-PROOF-v1"):
+def encode_image(image_path, secret="AI-PROOF-v1", strength=0.7, adaptive=False):
     """Encode watermark into image."""
     wrapper = get_wrapper()
-    return wrapper.encode_image(image_path, secret)
+    return wrapper.encode_image(image_path, secret, strength, adaptive)
 
 def decode_image(image_path):
     """Decode watermark from image."""

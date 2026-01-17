@@ -35,15 +35,22 @@ def read_root():
     }
 
 @app.post("/api/stamp")
-async def stamp_image(file: UploadFile = File(...)):
+async def stamp_image(file: UploadFile = File(...), strength: float = 0.7, adaptive: bool = False):
     """
     Embed invisible watermark "AI-PROOF-v1" into an uploaded image.
+    
+    Args:
+        file: Image file to watermark
+        strength: Watermark strength 0.0-1.0 (default 0.7, lower = less visible artifacts)
+        adaptive: Apply variance-based masking to reduce artifacts in flat areas (default False)
     
     Returns:
         JSON with:
         - stamped_image: base64 encoded PNG
         - watermark: "AI-PROOF-v1"
         - format: "PNG"
+        - strength: applied strength value
+        - adaptive: whether adaptive masking was used
     """
     try:
         # Check if file is an image
@@ -63,12 +70,14 @@ async def stamp_image(file: UploadFile = File(...)):
         
         try:
             # Encode watermark into image
-            stamped_base64 = encode_image(tmp_path, secret="AI-PROOF-v1")
+            stamped_base64 = encode_image(tmp_path, secret="AI-PROOF-v1", strength=strength, adaptive=adaptive)
             
             return JSONResponse({
                 "stamped_image": stamped_base64,
                 "watermark": "AI-PROOF-v1",
                 "format": "PNG",
+                "strength": strength,
+                "adaptive": adaptive,
                 "status": "success"
             })
         finally:

@@ -11,6 +11,8 @@ export default function GeneratePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [strength, setStrength] = useState(0.7);
+  const [adaptive, setAdaptive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -49,7 +51,7 @@ export default function GeneratePage() {
         const apiUrl = typeof window !== 'undefined'
           ? `http://${window.location.hostname}:8000`
           : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiUrl}/api/stamp`, {
+      const response = await fetch(`${apiUrl}/api/stamp?strength=${strength}&adaptive=${adaptive}`, {
         method: 'POST',
         body: formData,
       });
@@ -152,6 +154,47 @@ export default function GeneratePage() {
             <p className="text-sm text-slate-500">
               Supported formats: PNG, JPEG, WebP, GIF
             </p>
+          </div>
+
+          {/* Watermark Settings */}
+          <div className="mt-6 pt-6 border-t border-slate-700">
+            <h3 className="text-lg font-semibold mb-4 text-slate-300">Watermark Settings</h3>
+            
+            {/* Strength Slider */}
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm text-slate-400">Strength (lower = less visible)</label>
+                <span className="text-sm font-mono text-blue-400">{strength.toFixed(2)}</span>
+              </div>
+              <input
+                type="range"
+                min="0.1"
+                max="1.0"
+                step="0.05"
+                value={strength}
+                onChange={(e) => setStrength(parseFloat(e.target.value))}
+                className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              />
+              <div className="flex justify-between text-xs text-slate-500 mt-1">
+                <span>Stealthy (0.1)</span>
+                <span>Balanced (0.7)</span>
+                <span>Robust (1.0)</span>
+              </div>
+            </div>
+
+            {/* Adaptive Toggle */}
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="adaptive"
+                checked={adaptive}
+                onChange={(e) => setAdaptive(e.target.checked)}
+                className="w-4 h-4 text-blue-500 bg-slate-700 border-slate-600 rounded focus:ring-blue-500"
+              />
+              <label htmlFor="adaptive" className="text-sm text-slate-400 cursor-pointer">
+                Adaptive masking (reduces artifacts in flat areas)
+              </label>
+            </div>
           </div>
         </motion.div>
 
