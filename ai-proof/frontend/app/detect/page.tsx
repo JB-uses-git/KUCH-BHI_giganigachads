@@ -218,10 +218,16 @@ export default function DetectPage() {
                     className={`p-4 rounded-lg mb-6 text-center font-bold text-lg ${
                       result.detected
                         ? 'bg-red-900/50 border border-red-500 text-red-200'
+                        : result.confidence > 0.5
+                        ? 'bg-yellow-900/50 border border-yellow-500 text-yellow-200'
                         : 'bg-green-900/50 border border-green-500 text-green-200'
                     }`}
                   >
-                    {result.detected ? '⚠️ AI-GENERATED DETECTED' : '✅ AUTHENTIC IMAGE'}
+                    {result.detected 
+                      ? '⚠️ AI-GENERATED DETECTED' 
+                      : result.confidence > 0.5
+                      ? '⚠️ UNCERTAIN - Weak Watermark Signal'
+                      : '✅ AUTHENTIC IMAGE'}
                   </motion.div>
 
                   {/* Confidence Score */}
@@ -240,6 +246,8 @@ export default function DetectPage() {
                         className={`h-full rounded-full ${
                           result.detected
                             ? 'bg-gradient-to-r from-red-500 to-red-600'
+                            : result.confidence > 0.5
+                            ? 'bg-gradient-to-r from-yellow-500 to-yellow-600'
                             : 'bg-gradient-to-r from-green-500 to-green-600'
                         }`}
                       />
@@ -257,8 +265,12 @@ export default function DetectPage() {
                   )}
 
                   {/* Message */}
-                  <p className="text-slate-300 text-sm italic">
-                    {result.message}
+                  <p className="text-slate-300 text-sm">
+                    {result.detected 
+                      ? result.message 
+                      : result.confidence > 0.5
+                      ? `Partial watermark signal detected (${(result.confidence * 100).toFixed(1)}%) but below detection threshold (85%). Image may have been modified or attacked.`
+                      : result.message}
                   </p>
                 </div>
               )}

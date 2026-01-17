@@ -31,6 +31,10 @@ export default function GeneratePage() {
       return;
     }
 
+    // Clear previous state
+    setStampedImage(null);
+    setError(null);
+
     // Display original image
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -40,8 +44,6 @@ export default function GeneratePage() {
 
     // Send to backend
     setLoading(true);
-    setError(null);
-    setStampedImage(null);
 
     try {
       const formData = new FormData();
@@ -87,6 +89,8 @@ export default function GeneratePage() {
     if (files && files.length > 0) {
       processFile(files[0]);
     }
+    // Reset input value so same file can be selected again
+    e.target.value = '';
   };
 
   const handleClick = () => {
