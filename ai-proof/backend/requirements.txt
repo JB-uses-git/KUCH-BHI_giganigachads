@@ -1,0 +1,18 @@
+fastapi==0.95.2
+uvicorn==0.22.0
+python-multipart==0.0.6
+
+tensorflow==1.15.5
+numpy==1.18.5
+
+opencv-python-headless==4.5.5.64
+Pillow==8.4.0
+
+pydantic==1.10.13
+
+# Pins required for TensorFlow 1.15 compatibility
+protobuf==3.20.3
+h5py==2.10.0
+grpcio==1.41.0
+
+
