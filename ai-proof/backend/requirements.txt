@@ -2,17 +2,17 @@ fastapi==0.95.2
 uvicorn==0.22.0
 python-multipart==0.0.6
 
-tensorflow==1.15.5
-numpy==1.18.5
+tensorflow==2.14.0
+numpy==1.24.3
 
-opencv-python-headless==4.5.5.64
-Pillow==8.4.0
+opencv-python-headless==4.8.1.78
+Pillow==10.0.0
 
 pydantic==1.10.13
 
-# Pins required for TensorFlow 1.15 compatibility
-protobuf==3.20.3
-h5py==2.10.0
-grpcio==1.41.0
+# Compatible with TensorFlow 2.14 and Python 3.10
+protobuf==4.24.0
+h5py==3.9.0
+grpcio==1.59.0
 
 
