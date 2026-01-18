@@ -66,12 +66,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# TensorFlow
-*.pb
-*.ckpt
-*.meta
-*.index
-*.data
+# TensorFlow - tracked by Git LFS
+# *.pb, *.index, *.data are handled by LFS patterns in .gitattributes
+# Don't ignore these files - they're tracked by LFS instead
 
 # Temporary files
 tmp/

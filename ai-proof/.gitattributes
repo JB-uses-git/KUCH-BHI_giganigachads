@@ -1,0 +1,17 @@
+# Git LFS Configuration for Model Files
+# TensorFlow SavedModel files
+*.pb filter=lfs diff=lfs merge=lfs -text
+*.data filter=lfs diff=lfs merge=lfs -text
+*.index filter=lfs diff=lfs merge=lfs -text
+# Checkpoint files
+*.ckpt* filter=lfs diff=lfs merge=lfs -text
+*.meta filter=lfs diff=lfs merge=lfs -text
+# Model directories
+backend/app/models/** filter=lfs diff=lfs merge=lfs -text
+# Other large files that might need LFS
+*.tar.gz filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.h5 filter=lfs diff=lfs merge=lfs -text
+backend/app/models/**/*.pb filter=lfs diff=lfs merge=lfs -text
+backend/app/models/**/*.data* filter=lfs diff=lfs merge=lfs -text
+backend/app/models/**/*.index filter=lfs diff=lfs merge=lfs -text
